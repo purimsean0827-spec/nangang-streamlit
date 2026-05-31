@@ -39,21 +39,9 @@ st.divider()
 # 3. 準備資料庫 (Data Preparation using Pandas)
 @st.cache_data
 def load_data():
-    years = [str(y) for y in range(2000, 2024)]
-    
-    # 模擬數據：千平方公尺
-    data_industrial = [100, 110, 90, 110, 100, 110, 90, 80, 80, 70, 70, 60, 50, 40, 40, 30, 20, 20, 15, 10, 10, 5, 5, 5]
-    data_residential = [40, 50, 40, 60, 80, 90, 80, 100, 120, 120, 140, 130, 160, 180, 160, 180, 220, 250, 280, 320, 380, 450, 420, 460]
-    data_commercial = [0, 0, 10, 20, 20, 20, 20, 30, 40, 40, 70, 70, 100, 130, 120, 170, 190, 230, 280, 340, 390, 420, 400, 450]
-    data_office = [0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 120, 220, 405, 580, 720, 975, 775, 985]
-
-    df = pd.DataFrame({
-        '年份': years,
-        '工業倉儲類': data_industrial,
-        '住宅類': data_residential,
-        '商業類 (商場/展覽)': data_commercial,
-        '辦公服務類 (生技/軟體/總部)': data_office
-    })
+    # 讀取 ETL 腳本產生的真實/模擬清理後資料
+    df = pd.read_csv('real_data.csv')
+    df['年份'] = df['年份'].astype(str)
     
     # 轉換為 Long Format 供 Plotly 使用
     df_long = df.melt(id_vars=['年份'], var_name='用途類別', value_name='總樓地板面積 (千平方公尺)')
@@ -61,13 +49,17 @@ def load_data():
 
 df_wide, df_long = load_data()
 
+# 動態獲取年份範圍以設定 Slider
+min_year = int(df_wide['年份'].min())
+max_year = int(df_wide['年份'].max())
+
 # 4. 側邊欄運算與篩選器 (Sidebar Filters for Interactivity)
 st.sidebar.header("📊 數據運算與篩選")
 selected_years = st.sidebar.slider(
     "選擇年份區間",
-    min_value=2000,
-    max_value=2023,
-    value=(2010, 2023)
+    min_value=min_year,
+    max_value=max_year,
+    value=(min_year, max_year)
 )
 
 st.sidebar.markdown("---")
